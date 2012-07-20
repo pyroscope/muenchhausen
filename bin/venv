@@ -1,0 +1,24 @@
+#! /bin/bash
+#
+# Create a Python virtualenv using current code (not the distribution's outdated one)
+#
+PYTHON=/usr/bin/python2
+test -x $PYTHON || PYTHON=/usr/bin/python
+
+# You can provide an alternative Python executable as the first argument, this
+# can for example be an interpreter installed into ~/.pythonbrew
+if test -x "$1"; then
+    PYTHON="$1"
+    shift
+fi
+
+# Be nice to github (get current source only once per day)
+venv_cached=/tmp/$USER-virtualenv-$(date +'%Y-%m-%d').py
+venv='https://github.com/pypa/virtualenv/raw/master/virtualenv.py'
+test -f $venv_cached || \
+    $PYTHON -c "import urllib2; open('$venv_cached','w').write(urllib2.urlopen('$venv').read())"
+
+# Call virtualenv
+deactivate 2>/dev/null || true
+$PYTHON $venv_cached "$@"
+
